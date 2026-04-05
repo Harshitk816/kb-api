@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { userRouter } from './modules/user/user.routes';
 // import { authRouter } from './modules/auth/auth.routes';
 // import { userRouter } from './modules/user/user.routes';
 // import { projectRouter } from './modules/projects/project.routes';
@@ -11,7 +12,7 @@ const baseRouter = Router();
 // baseRouter.use('/auth', authRouter);
 
 // Protected
-// baseRouter.use('/users', userRouter);
+baseRouter.use('/users', userRouter);
 // baseRouter.use('/projects', projectRouter);
 // baseRouter.use('/boards', boardRouter);
 // baseRouter.use('/tasks', taskRouter);

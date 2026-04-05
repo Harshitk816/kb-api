@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv';
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, { Application} from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { baseRouter } from './base.router';
-import { AppError } from './utils/http';
+import { action, AppError } from './utils/http';
 import { db } from './utils/database';
 import logger from './utils/logger';
 
@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: any, res: any, next: any) => {
     const start = Date.now();
 
     res.on('finish', () => {
@@ -34,20 +34,21 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+app.use(action);
+
 app.use('/api/v1', baseRouter);
 
-app.use((req: Request, _res: Response, next: NextFunction) => {
+app.use((req, _res, next) => {
     next(new AppError(`Route ${req.originalUrl} not found`, 404));
 });
 
-app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+app.use((err: any, req: any, res: any, _next: any) => {
     const statusCode = err.statusCode || 500;
 
-    // Log with full context
     logger.error({
         err,
         method: req.method,

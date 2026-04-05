@@ -191,6 +191,10 @@ class DbUtilityClass {
         return result.rowCount > 0;
     }
 
+    async transaction<T>(callback: (t: any) => Promise<T>): Promise<T> {
+        return db.tx(callback);
+    }
+
 
 }
 

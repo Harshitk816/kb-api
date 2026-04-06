@@ -36,7 +36,7 @@ class UserRepository {
     }
 
     async getUserByEmail(requestJSON: any) {
-        const {email} = requestJSON;
+        const {email} = requestJSON.body;
         return db.oneOrNone(userQueries.getUserByEmail, { email });
     }
 

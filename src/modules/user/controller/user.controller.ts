@@ -65,7 +65,7 @@ class UserController {
                 throw new AppError('Email and password are required', 400);
             }
 
-            const user = await userRepository.getUserByEmail(email);
+            const user = await userRepository.getUserByEmail(requestJSON);
             if (!user) throw new AppError('Invalid email or password', 401);
 
             const isValid = await bcrypt.compare(password, user.password_hash);
@@ -179,6 +179,14 @@ class UserController {
                 success: true,
                 message: 'User deleted successfully'
             });
+        } catch(err) {
+            next(err);
+        }
+    }
+
+    logout = async (req: any, res: any, next: any) => {
+        try {
+            res.status(200).json({ success: true, message: 'Logged out successfully' });
         } catch(err) {
             next(err);
         }

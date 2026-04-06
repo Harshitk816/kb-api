@@ -12,6 +12,7 @@ userRouter.post('/refresh',  userController.refreshToken);
 // Protected routes — authMiddleware applied to everything below
 userRouter.use(authMiddleware);
 userRouter.get('/me',        userController.me);
+userRouter.post('/logout',    userController.logout);
 userRouter.get('/:id',       userController.getUser);
 userRouter.put('/:id',       userController.updateUser);
 userRouter.delete('/:id',    userController.deleteUser);

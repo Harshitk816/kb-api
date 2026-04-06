@@ -12,15 +12,17 @@ export const authMiddleware = (req: any, _res: any, next: any): void => {
             throw new AppError('No token provided', 401);
         }
 
-         if (req.requestJSON) {
-            req.requestJSON.user = req.user;
+        const token = authHeader.substring(7);  
+        const decoded = jwtUtility.verifyAccessToken(token);
+        req.user = decoded;
+
+        if (req.requestJSON) {
+            req.requestJSON.user = decoded;
         }
         if (req.httpStack) {
-            req.httpStack.user = req.user;
+            req.httpStack.user = decoded;
         }
-
-        const token = authHeader.substring(7);
-        req.user = jwtUtility.verifyAccessToken(token);
+        
         next();
     } catch (err) {
         next(err);

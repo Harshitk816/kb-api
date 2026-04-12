@@ -1,0 +1,1 @@
+SELECT * FROM projects WHERE id = ${projectId} AND status = TRUE;

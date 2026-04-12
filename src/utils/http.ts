@@ -26,10 +26,10 @@ export const action = (req:any, res:any, next:any) => {
     };
 
     const requestJSON = {
-        body:   req.body   || {},
-        params: req.params || {},
-        query:  req.query  || {},
-        user:   req.user   || null
+        body:  req.body  || {},
+        query: req.query || {},
+        user:  req.user  || null,
+        get params() { return req.params || {}; }
     };
 
     // Attach both to req so any handler can access them

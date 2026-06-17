@@ -2,11 +2,9 @@ import { Router } from 'express';
 import { userRouter } from './modules/user/user.routes';
 import { projectRouter } from './modules/projects/project.routes';
 import { boardRouter } from './modules/boards/board.routes';
-// import { authRouter } from './modules/auth/auth.routes';
-// import { userRouter } from './modules/user/user.routes';
-// import { projectRouter } from './modules/projects/project.routes';
-// import { boardRouter } from './modules/boards/board.routes';
-// import { taskRouter } from './modules/tasks/task.routes';
+import { taskRouter } from './modules/tasks/task.routes';
+import { projectMemberRouter } from './modules/project-member/project-member.routes';
+import { taskAssignmentRouter } from './modules/task-assignment/task-assignment.routes';
 
 const baseRouter = Router();
 
@@ -17,6 +15,8 @@ const baseRouter = Router();
 baseRouter.use('/users', userRouter);
 baseRouter.use('/projects', projectRouter);
 baseRouter.use('/boards', boardRouter);
-// baseRouter.use('/tasks', taskRouter);
+baseRouter.use('/tasks', taskRouter);
+baseRouter.use('/project-members', projectMemberRouter);
+baseRouter.use('/task-assignments', taskAssignmentRouter);
 
 export { baseRouter };

@@ -1,3 +1,4 @@
+import { logActivity } from '../../../utils/audit';
 import { AppError } from '../../../utils/http';
 import logger from '../../../utils/logger';
 import { projectRepository } from '../../projects/repository/project.repository';
@@ -34,6 +35,16 @@ class ProjectMemberController {
             }
 
             const member = await projectMemberRepository.createProjectMember(requestJSON);
+            await logActivity({
+                projectId,
+                userId: requestJSON.user.userId,
+                actionType: 'project_member_added',
+                actionDetails: {
+                    memberId: member.id,
+                    addedUserId: userId,
+                    role: member.role
+                }
+            });
 
             logger.info({ projectId, userId }, 'Project member added');
 
@@ -97,6 +108,16 @@ class ProjectMemberController {
             if (!deleted) {
                 throw new AppError('Project member not found', 404);
             }
+
+            await logActivity({
+                projectId: existingMember.project_id,
+                userId: requestJSON.user.userId,
+                actionType: 'project_member_removed',
+                actionDetails: {
+                    removedUserId: existingMember.user_id,
+                    role: existingMember.role
+                }
+            });
 
             logger.info({ projectMemberId: requestJSON.params.id }, 'Project member removed');
 

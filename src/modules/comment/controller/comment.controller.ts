@@ -1,3 +1,4 @@
+import { logActivity } from '../../../utils/audit';
 import { AppError } from '../../../utils/http';
 import logger from '../../../utils/logger';
 import { taskRepository } from '../../tasks/repository/task.repository';
@@ -19,6 +20,15 @@ class CommentController {
             if (!task) throw new AppError('Task not found', 404);
 
             const comment = await commentRepository.createComment(requestJSON);
+            await logActivity({
+                projectId: task.project_id,
+                taskId: comment.task_id,
+                userId: requestJSON.user.userId,
+                actionType: 'comment_added',
+                actionDetails: {
+                    commentId: comment.id
+                }
+            });
             logger.info({ commentId: comment.id }, 'Comment created');
 
             res.status(201).json({
@@ -50,8 +60,19 @@ class CommentController {
             if (!existing) throw new AppError('Comment not found', 404);
             if (existing.user_id !== requestJSON.user.userId)
                 throw new AppError('Forbidden', 403);
+            const task = await taskRepository.getTaskById({ params: { id: existing.task_id } });
+            if (!task) throw new AppError('Task not found', 404);
 
             const comment = await commentRepository.updateComment(requestJSON);
+            await logActivity({
+                projectId: task.project_id,
+                taskId: existing.task_id,
+                userId: requestJSON.user.userId,
+                actionType: 'comment_updated',
+                actionDetails: {
+                    commentId: existing.id
+                }
+            });
             logger.info({ commentId: requestJSON.params.id }, 'Comment updated');
 
             res.status(200).json({
@@ -71,9 +92,20 @@ class CommentController {
             if (!existing) throw new AppError('Comment not found', 404);
             if (existing.user_id !== requestJSON.user.userId)
                 throw new AppError('Forbidden', 403);
+            const task = await taskRepository.getTaskById({ params: { id: existing.task_id } });
+            if (!task) throw new AppError('Task not found', 404);
 
             const deleted = await commentRepository.deleteComment(requestJSON);
             if (!deleted) throw new AppError('Comment not found', 404);
+            await logActivity({
+                projectId: task.project_id,
+                taskId: existing.task_id,
+                userId: requestJSON.user.userId,
+                actionType: 'comment_deleted',
+                actionDetails: {
+                    commentId: existing.id
+                }
+            });
             logger.info({ commentId: requestJSON.params.id }, 'Comment deleted');
 
             res.status(200).json({

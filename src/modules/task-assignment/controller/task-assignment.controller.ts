@@ -3,6 +3,7 @@ import logger from '../../../utils/logger';
 import { taskRepository } from '../../tasks/repository/task.repository'; 
 import { projectMemberRepository } from '../../project-member/repository/project-member.repository';
 import { taskAssignmentRepository } from '../repository/task-assignment.repository';
+import { logActivity } from '../../../utils/audit';
 
 class TaskAssignmentController {
 
@@ -33,6 +34,16 @@ class TaskAssignmentController {
                 throw new AppError('User is already assigned to this task', 409);
 
             const assignment = await taskAssignmentRepository.createTaskAssignment(requestJSON);
+            await logActivity({
+                projectId: task.project_id,
+                taskId: task.id,
+                userId: requestJSON.user.userId,
+                actionType: 'task_assigned',
+                actionDetails: {
+                    assignedUserId: userId,
+                    assignmentId: assignment.id
+                }
+            });
             logger.info({ taskId, userId }, 'User assigned to task');
 
             res.status(201).json({
@@ -58,8 +69,21 @@ class TaskAssignmentController {
             const existing = await taskAssignmentRepository.getTaskAssignmentById(requestJSON);
             if (!existing) throw new AppError('Assignment not found', 404);
 
+            const task = await taskRepository.getTaskById({ params: { id: existing.task_id } });
+            if (!task) throw new AppError('Task not found', 404);
+
             const deleted = await taskAssignmentRepository.deleteTaskAssignment(requestJSON);
             if (!deleted) throw new AppError('Assignment not found', 404);
+            await logActivity({
+                projectId: task.project_id,
+                taskId: task.id,
+                userId: requestJSON.user.userId,
+                actionType: 'task_unassigned',
+                actionDetails: {
+                    removedUserId: existing.user_id,
+                    assignmentId: existing.id
+                }
+            });
 
             logger.info({ assignmentId: requestJSON.params.id }, 'Task assignment removed');
 

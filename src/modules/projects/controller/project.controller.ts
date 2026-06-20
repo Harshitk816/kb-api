@@ -1,6 +1,7 @@
 import { AppError } from '../../../utils/http';
 import { projectRepository } from '../repository/project.repository';
 import logger from '../../../utils/logger';
+import { logActivity } from '../../../utils/audit';
 
 class ProjectController {
     createProject = async (req: any, res: any, next: any) => {
@@ -12,6 +13,14 @@ class ProjectController {
                 throw new AppError('projectName is required', 400);
 
             const project = await projectRepository.createProject(requestJSON);
+            await logActivity({
+                projectId: project.id,
+                userId: requestJSON.user.userId,
+                actionType: 'project_created',
+                actionDetails: {
+                    projectName: project.project_name
+                }
+            });
             logger.info({ projectId: project.id }, 'Project created');
 
             res.status(201).json({ success: true, message: 'Project created successfully', data: project });
@@ -51,6 +60,18 @@ class ProjectController {
                 throw new AppError('Forbidden', 403);
 
             const project = await projectRepository.updateProject(requestJSON);
+            if(project){
+                await logActivity({
+                projectId: project.id,
+                userId: requestJSON.user.userId,
+                actionType: 'project_updated',
+                actionDetails: {
+                    updatedFields: Object.keys(requestJSON.body)
+                }
+            });
+            }
+            
+
             logger.info({ projectId: requestJSON.params.id }, 'Project updated');
 
             res.status(200).json({ success: true, message: 'Project updated successfully', data: project });
@@ -70,6 +91,14 @@ class ProjectController {
 
             const deleted = await projectRepository.deleteProject(requestJSON);
             if (!deleted) throw new AppError('Project not found', 404);
+            await logActivity({
+                projectId: existing.id,
+                userId: requestJSON.user.userId,
+                actionType: 'project_deleted',
+                actionDetails: {
+                    projectName: existing.project_name
+                }
+            });
             logger.info({ projectId: requestJSON.params.id }, 'Project deleted');
 
             res.status(200).json({ success: true, message: 'Project deleted successfully' });

@@ -1,6 +1,7 @@
 import { AppError } from '../../../utils/http';
 import { boardRepository } from '../repository/board.repository';
 import logger from '../../../utils/logger';
+import { logActivity } from '../../../utils/audit';
 
 class BoardController {
 
@@ -14,6 +15,16 @@ class BoardController {
 
             const board = await boardRepository.createBoard(requestJSON);
             logger.info({ boardId: board.id }, 'Board created');
+            await logActivity({
+                projectId: board.project_id,
+                userId: requestJSON.user.userId,
+                actionType: 'board_created',
+                actionDetails: {
+                    boardId: board.id,
+                    boardName: board.board_name,
+                    position: board.position
+                }
+            });
 
             res.status(201).json({ success: true, message: 'Board created successfully', data: board });
         } catch(err) { 
@@ -47,6 +58,15 @@ class BoardController {
             const { requestJSON } = req;
             const board = await boardRepository.updateBoard(requestJSON);
             if (!board) throw new AppError('Board not found', 404);
+            await logActivity({
+                projectId: board.project_id,
+                userId: requestJSON.user.userId,
+                actionType: 'board_updated',
+                actionDetails: {
+                    boardId: board.id,
+                    updatedFields: Object.keys(requestJSON.body)
+                }
+            });
             logger.info({ boardId: requestJSON.params.id }, 'Board updated');
             res.status(200).json({ success: true, message: 'Board updated successfully', data: board });
         } catch(err) { 
@@ -57,8 +77,19 @@ class BoardController {
     deleteBoard = async (req: any, res: any, next: any) => {
         try {
             const { requestJSON } = req;
+            const board = await boardRepository.getBoardById(requestJSON);
+            if (!board) throw new AppError('Board not found', 404);
             const deleted = await boardRepository.deleteBoard(requestJSON);
             if (!deleted) throw new AppError('Board not found', 404);
+            await logActivity({
+                projectId: board.project_id,
+                userId: requestJSON.user.userId,
+                actionType: 'board_deleted',
+                actionDetails: {
+                    boardId: board.id,
+                    boardName: board.board_name
+                }
+            });
             logger.info({ boardId: requestJSON.params.id }, 'Board deleted');
             res.status(200).json({ success: true, message: 'Board deleted successfully' });
         } catch(err) { 

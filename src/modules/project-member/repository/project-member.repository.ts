@@ -3,11 +3,6 @@ import { projectMemberQueries } from './sql/project-member.queries';
 
 class ProjectMemberRepository {
 
-    async getProjectMemberById(requestJSON: any) {
-        return db.oneOrNone(projectMemberQueries.getProjectMemberById, {
-            projectMemberId: requestJSON.params.id
-        });
-    }
 
     async getProjectMembersByProject(requestJSON: any) {
         return db.manyOrNone(projectMemberQueries.getProjectMembersByProject, {
@@ -38,14 +33,39 @@ class ProjectMemberRepository {
         });
     }
 
-    async deleteProjectMember(requestJSON: any) {
-        const { params, user } = requestJSON;
-        return dbUtility.softDelete({
-            table: 'project_members',
-            where: { id: params.id },
-            deletedBy: user.userId
+
+    async getProjectMemberByProjectAndUserAnyStatus(requestJSON: any) {
+        return db.oneOrNone(projectMemberQueries.getProjectMemberByProjectAndUserAnyStatus, {
+            projectId: requestJSON.body.projectId,
+            userId: requestJSON.body.userId
         });
     }
+
+    async reactivateProjectMember(requestJSON: any) {
+        const { body, user } = requestJSON;
+        return db.one(projectMemberQueries.reactivateProjectMember, {
+            projectId: body.projectId,
+            userId: body.userId,
+            role: body.role || 'member',
+            updatedBy: user.userId
+        });
+    }
+
+    async getProjectMemberById(requestJSON: any) {
+    return db.oneOrNone(projectMemberQueries.getProjectMemberById, {
+        projectMemberId: requestJSON.params.id
+    });
+}
+
+async deleteProjectMember(requestJSON: any) {
+    const { params, user } = requestJSON;
+
+    return dbUtility.softDelete({
+        table: 'project_members',
+        where: { id: params.id },
+        deletedBy: user.userId
+    });
+}
 }
 
 export const projectMemberRepository = new ProjectMemberRepository();

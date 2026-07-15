@@ -8,5 +8,6 @@ export const userQueries = {
     getUserByEmail: dbUtility.getSQL(path.join(sqlPath, 'get-user-by-email.sql')),
     getUserByUsername: dbUtility.getSQL(path.join(sqlPath, 'get-user-by-username.sql')),
     getUserById: dbUtility.getSQL(path.join(sqlPath, 'get-user-by-id.sql')),
+    getAllUsers:     dbUtility.getSQL(path.join(sqlPath, 'get-all-users.sql')),
     
 };

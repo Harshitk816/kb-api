@@ -83,6 +83,9 @@ class UserRepository {
             deletedBy: user.userId
         });
     }
+    async getAllUsers(requestJSON: any) {
+        return db.manyOrNone(userQueries.getAllUsers, {});
+    }
 
 }
 

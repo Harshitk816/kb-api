@@ -45,6 +45,12 @@ class TaskAssignmentRepository {
             deletedBy: user.userId
         });
     }
+
+    async getTaskAssignmentsByUser(requestJSON: any) {
+        return db.manyOrNone(taskAssignmentQueries.getTaskAssignmentsByUser, {
+            userId: requestJSON.user.userId
+        });
+    }
 }
 
 export const taskAssignmentRepository = new TaskAssignmentRepository();

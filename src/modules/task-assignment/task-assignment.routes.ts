@@ -7,6 +7,7 @@ const taskAssignmentRouter = Router();
 taskAssignmentRouter.use(authMiddleware);
 
 taskAssignmentRouter.post('/',               taskAssignmentController.assignUser);
+taskAssignmentRouter.get('/me',              taskAssignmentController.getMyTaskAssignments);
 taskAssignmentRouter.get('/task/:taskId',    taskAssignmentController.getTaskAssignments);
 taskAssignmentRouter.delete('/:id',          taskAssignmentController.removeAssignment);
 

@@ -23,10 +23,10 @@ class UserController {
                 throw new AppError('Password must be at least 6 characters', 400);
             }
 
-            const existingEmail = await userRepository.getUserByEmail(email);
+            const existingEmail = await userRepository.getUserByEmail(requestJSON);
             if (existingEmail) throw new AppError('Email already registered', 409);
 
-            const existingUsername = await userRepository.getUserByUsername(username);
+            const existingUsername = await userRepository.getUserByUsername(requestJSON);
             if (existingUsername) throw new AppError('Username already taken', 409);
 
             requestJSON.body.passwordHash = await bcrypt.hash(password, 10);
@@ -190,6 +190,19 @@ class UserController {
         } catch(err) {
             next(err);
         }
+    }
+
+    getAllUsers = async (req: any, res: any, next: any) => {
+        try {
+            const { requestJSON } = req;
+
+            const users = await userRepository.getAllUsers(requestJSON);
+
+            res.status(200).json({
+                success: true,
+                data: users
+            });
+        } catch (err) { next(err); }
     }
 
 }

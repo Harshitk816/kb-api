@@ -93,6 +93,19 @@ class TaskAssignmentController {
             });
         } catch (err) { next(err); }
     }
+
+    getMyTaskAssignments = async (req: any, res: any, next: any) => {
+        try {
+            const { requestJSON } = req;
+
+            const assignments = await taskAssignmentRepository.getTaskAssignmentsByUser(requestJSON);
+
+            res.status(200).json({
+                success: true,
+                data: assignments
+            });
+        } catch (err) { next(err); }
+    }
 }
 
 export const taskAssignmentController = new TaskAssignmentController();
